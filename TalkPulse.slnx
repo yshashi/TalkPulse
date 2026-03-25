@@ -1,0 +1,6 @@
+<Solution>
+  <Project Path="TalkPulse.Api/TalkPulse.Api.csproj" />
+  <Project Path="TalkPulse.Api.Tests/TalkPulse.Api.Tests.csproj" />
+  <Project Path="TalkPulse.ServiceDefaults/TalkPulse.ServiceDefaults.csproj" />
+  <Project Path="TalkPulse.Worker/TalkPulse.Worker.csproj" />
+</Solution>

@@ -1,0 +1,6 @@
+@TalkPulse.Api_HostAddress = http://localhost:5193
+
+GET {{TalkPulse.Api_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

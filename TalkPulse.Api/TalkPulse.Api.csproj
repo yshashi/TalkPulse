@@ -1,0 +1,33 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- OpenAPI -->
+    <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.5" />
+
+    <!-- Database: EF Core + PostgreSQL (connection managed by Aspire) -->
+    <PackageReference Include="Aspire.Npgsql.EntityFrameworkCore.PostgreSQL" Version="*" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="*">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
+    </PackageReference>
+
+    <!-- Messaging: RabbitMQ (connection managed by Aspire) -->
+    <PackageReference Include="Aspire.RabbitMQ.Client" Version="*" />
+
+    <!-- Logging: Serilog -->
+    <PackageReference Include="Serilog.AspNetCore" Version="*" />
+    <PackageReference Include="Serilog.Sinks.OpenTelemetry" Version="*" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Shared: OpenTelemetry metrics + tracing, health checks, service discovery -->
+    <ProjectReference Include="..\TalkPulse.ServiceDefaults\TalkPulse.ServiceDefaults.csproj" />
+  </ItemGroup>
+
+</Project>
