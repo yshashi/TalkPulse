@@ -1,6 +1,7 @@
 #:sdk Aspire.AppHost.Sdk@13.2.0
 #:package Aspire.Hosting.PostgreSQL@13.2.0
 #:package Aspire.Hosting.RabbitMQ@13.2.0
+#:package Aspire.Hosting.Redis@13.2.0
 #:project ../TalkPulse.Api/TalkPulse.Api.csproj
 #:project ../TalkPulse.Worker/TalkPulse.Worker.csproj
 
@@ -20,12 +21,19 @@ var db = postgres.AddDatabase("talkpulsedb");
 var messaging = builder.AddRabbitMQ("messaging")
     .WithManagementPlugin();
 
+// ── Redis cache ───────────────────────────────────────────────────────────────
+var redis = builder.AddRedis("redis")
+    .WithRedisCommander()
+    .WithDataVolume(); // Persist cache data across container restarts (optional for Redis)
+
 // ── API ───────────────────────────────────────────────────────────────────────
 builder.AddProject<Projects.TalkPulse_Api>("api")
     .WithReference(db)
     .WithReference(messaging)
+    .WithReference(redis)
     .WaitFor(db)
-    .WaitFor(messaging);
+    .WaitFor(messaging)
+    .WaitFor(redis);
 
 // ── Worker (background message consumer) ─────────────────────────────────────
 builder.AddProject<Projects.TalkPulse_Worker>("worker")

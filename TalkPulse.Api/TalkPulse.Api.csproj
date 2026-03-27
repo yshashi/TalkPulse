@@ -8,17 +8,23 @@
 
   <ItemGroup>
     <!-- OpenAPI -->
+    <PackageReference Include="Aspire.StackExchange.Redis" Version="13.2.0" />
+    <PackageReference Include="FluentValidation" Version="12.1.1" />
+    <PackageReference Include="MediatR" Version="14.1.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="10.0.5" />
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.5" />
 
     <!-- Database: EF Core + PostgreSQL (connection managed by Aspire) -->
-    <PackageReference Include="Aspire.Npgsql.EntityFrameworkCore.PostgreSQL" Version="*" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="*">
+    <PackageReference Include="Aspire.Npgsql.EntityFrameworkCore.PostgreSQL" Version="13.2.0" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.5">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
     </PackageReference>
 
     <!-- Messaging: RabbitMQ (connection managed by Aspire) -->
     <PackageReference Include="Aspire.RabbitMQ.Client" Version="*" />
+    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="10.0.1" />
+    <PackageReference Include="Scalar.AspNetCore" Version="2.13.15" />
 
     <!-- Logging: Serilog -->
     <PackageReference Include="Serilog.AspNetCore" Version="*" />
