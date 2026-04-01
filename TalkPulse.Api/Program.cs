@@ -1,7 +1,10 @@
+using FluentValidation;
+using Microsoft.EntityFrameworkCore;
 using Scalar.AspNetCore;
 using Serilog;
 using Serilog.Sinks.OpenTelemetry;
-using TalkPulse.Api.Data;
+using TalkPulse.Api.Common.Persistence;
+;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -29,11 +32,18 @@ builder.AddServiceDefaults();
 
 // ── Database: EF Core + PostgreSQL ───────────────────────────────────────────
 // "talkpulsedb" must match the database name registered in AppHost.
-builder.AddNpgsqlDbContext<AppDbContext>("talkpulsedb");
+// builder.AddNpgsqlDbContext<AppDbContext>("talkpulsedb"); --> Will check it later to see what is the issue
+
+builder.Services.AddDbContext<AppDbContext>(options =>
+    options.UseNpgsql(builder.Configuration.GetConnectionString("default")));
 
 // ── Messaging: RabbitMQ ───────────────────────────────────────────────────────
 // "messaging" must match the resource name registered in AppHost.
 builder.AddRabbitMQClient("messaging");
+
+//builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssemblyContaining<Program>());
+builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(Program).Assembly));
+builder.Services.AddValidatorsFromAssembly(typeof(Program).Assembly);
 
 // ── OpenAPI ───────────────────────────────────────────────────────────────────
 builder.Services.AddOpenApi();
@@ -60,7 +70,7 @@ app.MapGet("/weatherforecast", () =>
 {
     var logger = app.Services.GetRequiredService<ILogger<Program>>();
     logger.LogInformation("Generating weather forecast");
-    var forecast =  Enumerable.Range(1, 5).Select(index =>
+    var forecast = Enumerable.Range(1, 5).Select(index =>
         new WeatherForecast
         (
             DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
