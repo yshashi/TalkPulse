@@ -1,3 +1,5 @@
+using System.Security.Cryptography;
+
 namespace TalkPulse.Api.Common.Domains;
 
 public sealed class Session
@@ -10,8 +12,8 @@ public sealed class Session
 
     public string JoinCode { get; private set; } = string.Empty;
     public DateTime CreatedAt { get; private set; } = DateTime.UtcNow;
-    public DateTime StartedAt { get; private set; }
-    public DateTime EndedAt { get; private set; }
+    public DateTime? StartedAt { get; private set; }
+    public DateTime? EndedAt { get; private set; }
 
     public Guid SpeakerId { get; private set; }
     public Speaker Speaker { get; private set; } = default!;
@@ -52,7 +54,9 @@ public sealed class Session
 
     private static string GenerateJoinCode()
     {
-        return Random.Shared.Next(100000, 999999).ToString(); // Simple 6-digit code for demo purposes
+        const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+        var bytes = RandomNumberGenerator.GetBytes(6);
+        return new string(bytes.Select(b => chars[b % chars.Length]).ToArray());
     }
 }
 

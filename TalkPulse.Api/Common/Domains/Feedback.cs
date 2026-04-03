@@ -20,6 +20,9 @@ public sealed class Feedback
         if (string.IsNullOrWhiteSpace(text))
             throw new ArgumentException("Feedback text cannot be empty.", nameof(text));
 
+        if (text.Length > 1000)
+            throw new ArgumentException("Feedback text cannot exceed 1000 characters.", nameof(text));
+
         return new Feedback
         {
             Text = text,

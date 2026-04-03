@@ -22,8 +22,9 @@ public sealed class Poll
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(question);
 
-        if (!options.Any())
-            throw new ArgumentException("At least one option is required.", nameof(options));
+        var optionsList = options.ToList();
+        if (optionsList.Count < 2)
+            throw new ArgumentException("At least two options are required.", nameof(options));
 
         var poll = new Poll
         {
@@ -31,7 +32,7 @@ public sealed class Poll
             SessionId = sessionId
         };
 
-        poll.Options = [.. options.Select(option => PollOption.Create(option, poll.Id))];
+        poll.Options = [.. optionsList.Select(option => PollOption.Create(option, poll.Id))];
 
         return poll;
 

@@ -6,6 +6,9 @@ public sealed class PollOption
     public string Text { get; private set; } = string.Empty;
     public int VoteCount { get; private set; }
 
+    // Optimistic concurrency via PostgreSQL xmin system column.
+    public uint Version { get; private set; }
+
     public Guid PollId { get; private set; }
     public Poll Poll { get; private set; } = default!;
 
@@ -17,7 +20,7 @@ public sealed class PollOption
         {
             Text = text,
             PollId = pollId
-        };  
+        };
     }
 
     public void IncrementVote() => VoteCount++;

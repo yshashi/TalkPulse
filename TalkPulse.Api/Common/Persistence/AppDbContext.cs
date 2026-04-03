@@ -58,6 +58,9 @@ public sealed class AppDbContext(DbContextOptions<AppDbContext> options) : DbCon
             o.HasKey(o => o.Id).HasName("PK_PollOptions");
             o.Property(o => o.Text).IsRequired().HasMaxLength(200);
 
+            // Optimistic concurrency via PostgreSQL xmin system column.
+            o.Property(o => o.Version).IsConcurrencyToken();
+
             o.HasOne(o => o.Poll)
                 .WithMany(p => p.Options)
                 .HasForeignKey(o => o.PollId)
@@ -67,11 +70,20 @@ public sealed class AppDbContext(DbContextOptions<AppDbContext> options) : DbCon
         modelBuilder.Entity<Vote>(v =>
         {
             v.HasKey(v => v.Id).HasName("PK_Votes");
-            v.HasIndex(v => v.AudienceFingerprint).IsUnique();
+
+            // Prevent the same audience member from voting on the same poll twice.
+            v.HasIndex(v => new { v.PollId, v.AudienceFingerprint })
+                .IsUnique()
+                .HasFilter("\"AudienceFingerprint\" IS NOT NULL");
 
             v.HasOne(v => v.PollOption)
                 .WithMany()
                 .HasForeignKey(v => v.PollOptionId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            v.HasOne<Poll>()
+                .WithMany()
+                .HasForeignKey(v => v.PollId)
                 .OnDelete(DeleteBehavior.Cascade);
 
             v.HasOne(v => v.Session)
@@ -85,7 +97,12 @@ public sealed class AppDbContext(DbContextOptions<AppDbContext> options) : DbCon
             f.HasKey(f => f.Id).HasName("PK_Feedbacks");
             f.Property(f => f.Text).IsRequired().HasMaxLength(1000);
             f.Property(f => f.Rating).IsRequired();
-            f.HasIndex(f => f.AudienceFingerprint).IsUnique();
+
+            // Prevent the same audience member from submitting feedback for the same session twice.
+            f.HasIndex(f => new { f.SessionId, f.AudienceFingerprint })
+                .IsUnique()
+                .HasFilter("\"AudienceFingerprint\" IS NOT NULL");
+
             f.Property(f => f.Type).HasConversion<string>();
 
             f.HasOne(f => f.Session)
