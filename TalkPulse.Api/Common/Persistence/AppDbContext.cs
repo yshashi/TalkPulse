@@ -42,7 +42,10 @@ public sealed class AppDbContext(DbContextOptions<AppDbContext> options) : DbCon
         {
             p.HasKey(p => p.Id).HasName("PK_Polls");
             p.Property(p => p.Question).IsRequired().HasMaxLength(500);
-            p.Property(p => p.RowVersion).IsRowVersion();
+
+            // PostgreSQL optimistic concurrency via the built-in xmin system column.
+            // No migration needed — xmin is maintained automatically by PostgreSQL.
+            p.Property(p => p.Version).IsConcurrencyToken();
 
             p.HasOne(p => p.Session)
                 .WithMany(s => s.Polls)

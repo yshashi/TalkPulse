@@ -11,7 +11,8 @@ var builder = DistributedApplication.CreateBuilder(args);
 // Runs a Postgres container. WithPgAdmin adds a browser-based admin UI.
 // WithDataVolume persists data across container restarts.
 var postgres = builder.AddPostgres("postgres")
-    .WithPgAdmin()
+    .WithHostPort(5436) // Map to a non-default port to avoid conflicts with local dev Postgres
+    .WithPgAdmin(pg => pg.WithHostPort(8080))
     .WithDataVolume(); //check more about this in the documentation: https://docs.aspire.dev/apphost/features/databases#data-persistence
 
 var db = postgres.AddDatabase("talkpulsedb");

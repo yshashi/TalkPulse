@@ -1,6 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 
 namespace TalkPulse.Api.Common.Domains;
+
 public sealed class Poll
 {
     public Guid Id { get; private set; } = Guid.NewGuid();
@@ -8,17 +9,16 @@ public sealed class Poll
     public bool IsActive { get; private set; }
     public DateTime CreatedAt { get; private set; } = DateTime.UtcNow;
 
-    // Optimistic concurrency control: Track total votes to detect concurrent updates
+    // Optimistic concurrency via PostgreSQL xmin system column — no extra column needed.
+    // Configured via UseXminAsConcurrencyToken() in AppDbContext.
+    public uint Version { get; private set; }
 
-    [Timestamp]
-    public byte[] RowVersion { get; private set; } = [];
-    public IReadOnlyCollection<PollOption> Options { get; private set; } = [];
-
+    public IReadOnlyCollection<PollOption> Options { get; private set; } = new List<PollOption>();
 
     public Guid SessionId { get; private set; }
     public Session Session { get; private set; } = default!;
 
-    public static Poll Create(string question, IEnumerable<PollOption> options, Guid sessionId)
+    public static Poll Create(string question, IEnumerable<string> options, Guid sessionId)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(question);
 
@@ -31,8 +31,8 @@ public sealed class Poll
             SessionId = sessionId
         };
 
-        poll.Options = [.. options.Select(o => PollOption.Create(o.Text, poll.Id))];
-        
+        poll.Options = [.. options.Select(option => PollOption.Create(option, poll.Id))];
+
         return poll;
 
     }

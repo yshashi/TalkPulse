@@ -16,22 +16,19 @@ public sealed class Session
     public Guid SpeakerId { get; private set; }
     public Speaker Speaker { get; private set; } = default!;
 
-    public IReadOnlyCollection<Feedback> Feedbacks { get; private set; } = [];
-    public IReadOnlyCollection<Poll> Polls { get; private set; } = [];
+    public IReadOnlyCollection<Feedback> Feedbacks { get; private set; } = new List<Feedback>();
+    public IReadOnlyCollection<Poll> Polls { get; private set; } = new List<Poll>();
 
-    public static Session Create(string title, string? description, DateTime scheduledAt, Guid speakerId)
+    public static Session Create(string title, string? description, Guid speakerId)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(title);
-
-        if (scheduledAt <= DateTime.UtcNow)
-            throw new ArgumentException("Scheduled time must be in the future.", nameof(scheduledAt));
 
         return new Session
         {
             Title = title,
             Description = description,
             SpeakerId = speakerId,
-            JoinCode = GenerateJoinCode()
+            JoinCode = GenerateJoinCode(),
         };
     }
 

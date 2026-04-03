@@ -8,7 +8,7 @@ public sealed class Speaker
     public string PasswordHash { get; private set; } = string.Empty;
 
     // Speakers will have sessions
-    public IReadOnlyCollection<Session> Sessions { get; private set; } = [];
+    public IReadOnlyCollection<Session> Sessions { get; private set; } = new List<Session>();
 
 
     public static Speaker Create(string name, string email, string passwordHash)

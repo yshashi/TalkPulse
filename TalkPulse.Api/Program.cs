@@ -2,7 +2,7 @@ using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using Scalar.AspNetCore;
 using Serilog;
-using Serilog.Sinks.OpenTelemetry;
+using TalkPulse.Api.Common.Domains;
 using TalkPulse.Api.Common.Persistence;
 ;
 
@@ -32,7 +32,8 @@ builder.AddServiceDefaults();
 
 // ── Database: EF Core + PostgreSQL ───────────────────────────────────────────
 // "talkpulsedb" must match the database name registered in AppHost.
-// builder.AddNpgsqlDbContext<AppDbContext>("talkpulsedb"); --> Will check it later to see what is the issue
+//builder.AddNpgsqlDbContext<AppDbContext>("talkpulsedb");
+// --> Will check it later to see what is the issue
 
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("default")));
@@ -54,6 +55,13 @@ if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
     app.MapScalarApiReference();
+
+    var scope = app.Services.CreateScope();
+    var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    await db.Database.MigrateAsync();
+
+    // seeding of data
+    await SeedSpeakerDataAsync(db);
 }
 
 app.UseHttpsRedirection();
@@ -66,7 +74,7 @@ var summaries = new[]
     "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
 };
 
-app.MapGet("/weatherforecast", () =>
+app.MapGet("/weatherforecast", async () =>
 {
     var logger = app.Services.GetRequiredService<ILogger<Program>>();
     logger.LogInformation("Generating weather forecast");
@@ -84,6 +92,20 @@ app.MapGet("/weatherforecast", () =>
 .WithName("GetWeatherForecast");
 
 app.Run();
+
+static async Task SeedSpeakerDataAsync(AppDbContext db)
+{
+    Console.WriteLine("Seeding development data...");
+    if (await db.Speakers.AnyAsync())
+        return;
+
+    var speaker = Speaker.Create("Sashikumar Yadav", "sky@gmail.com", "Qwerty@123");
+    db.Speakers.Add(speaker);
+    await db.SaveChangesAsync();
+
+    Console.WriteLine("Seeded development data.");
+
+}
 
 record WeatherForecast(DateOnly Date, int TemperatureC, string? Summary)
 {
