@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Scalar.AspNetCore;
 using Serilog;
 using TalkPulse.Api.Common.Domains;
+using TalkPulse.Api.Common.Extensions;
 using TalkPulse.Api.Common.Persistence;
 ;
 
@@ -48,6 +49,7 @@ builder.Services.AddValidatorsFromAssembly(typeof(Program).Assembly);
 
 // ── OpenAPI ───────────────────────────────────────────────────────────────────
 builder.Services.AddOpenApi();
+builder.Services.AddEndpoints(typeof(Program).Assembly);
 
 var app = builder.Build();
 
@@ -69,27 +71,8 @@ app.UseHttpsRedirection();
 // Health check endpoints: /health and /alive
 app.MapDefaultEndpoints();
 
-var summaries = new[]
-{
-    "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
-};
-
-app.MapGet("/weatherforecast", async () =>
-{
-    var logger = app.Services.GetRequiredService<ILogger<Program>>();
-    logger.LogInformation("Generating weather forecast");
-    var forecast = Enumerable.Range(1, 5).Select(index =>
-        new WeatherForecast
-        (
-            DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
-            Random.Shared.Next(-20, 55),
-            summaries[Random.Shared.Next(summaries.Length)]
-        ))
-        .ToArray();
-    logger.LogInformation("Weather forecast generated: {@Forecast}", forecast);
-    return forecast;
-})
-.WithName("GetWeatherForecast");
+var routeGroupBuilder = app.MapGroup("/api/v1").WithTags("TalkPulse API v1");
+app.MapEndPoints(routeGroupBuilder);
 
 app.Run();
 
@@ -105,10 +88,5 @@ static async Task SeedSpeakerDataAsync(AppDbContext db)
 
     Console.WriteLine("Seeded development data.");
 
-}
-
-record WeatherForecast(DateOnly Date, int TemperatureC, string? Summary)
-{
-    public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
 }
 

@@ -56,7 +56,7 @@ public sealed class Session
     {
         const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
         var bytes = RandomNumberGenerator.GetBytes(6);
-        return new string(bytes.Select(b => chars[b % chars.Length]).ToArray());
+        return new string([.. bytes.Select(b => chars[b % chars.Length])]);
     }
 }
 
