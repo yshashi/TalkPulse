@@ -3,9 +3,9 @@
   "configurations": [
     {
       "name": "Aspire AppHost",
-      "type": "dotnet",
+      "type": "aspire",
       "request": "launch",
-      "projectPath": "${workspaceFolder}/TalkPulse.AppHost/apphost.cs"
+      "program": "${workspaceFolder}"
     }
   ]
 }

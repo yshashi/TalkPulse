@@ -2,6 +2,8 @@ using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using Scalar.AspNetCore;
 using Serilog;
+using TalkPulse.Api.Common;
+using TalkPulse.Api.Common.Behaviors;
 using TalkPulse.Api.Common.Domains;
 using TalkPulse.Api.Common.Extensions;
 using TalkPulse.Api.Common.Persistence;
@@ -44,8 +46,16 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 builder.AddRabbitMQClient("messaging");
 
 //builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssemblyContaining<Program>());
-builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(Program).Assembly));
-builder.Services.AddValidatorsFromAssembly(typeof(Program).Assembly);
+builder.Services.AddMediatR(cfg =>
+{
+    cfg.RegisterServicesFromAssembly(typeof(Program).Assembly);
+    cfg.AddOpenBehavior(typeof(ValidationBehavior<,>));
+    cfg.AddOpenBehavior(typeof(LoggingBehavior<,>));
+});
+builder.Services.AddValidatorsFromAssembly(typeof(Program).Assembly, includeInternalTypes: true);
+
+builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
+builder.Services.AddProblemDetails();
 
 // ── OpenAPI ───────────────────────────────────────────────────────────────────
 builder.Services.AddOpenApi();
@@ -65,7 +75,7 @@ if (app.Environment.IsDevelopment())
     // seeding of data
     await SeedSpeakerDataAsync(db);
 }
-
+app.UseExceptionHandler();
 app.UseHttpsRedirection();
 
 // Health check endpoints: /health and /alive
